@@ -4552,7 +4552,8 @@ it must perform the following steps:
 <div algorithm="mtu changes">
 When the ATT_MTU negotiated for the connection to a remote device changes, for
 example because the UA receives the result of an [=Exchange MTU=] procedure,
-the UA must perform the following steps:
+the UA must <dfn>respond to an ATT_MTU change</dfn> for that device with the new
+ATT_MTU |attMtu|:
 
 Note: The UA only runs these steps when it observes an ATT_MTU change. Updating
 the stored value and firing the {{maxwritewithoutresponsesizechanged}} event
@@ -4561,9 +4562,9 @@ that do not surface ATT_MTU changes to the UA never run these steps, so on those
 platforms the value stays constant after it is first established and the event
 never fires.
 
-1. Let <var>newSize</var> be the ATT_MTU now negotiated for the connection
-    &minus; 3. This is the smaller of the local Host's transmit ATT_MTU and the
-    peer's receive ATT_MTU, less the 3-octet ATT Write Command header.
+1. Let <var>newSize</var> be |attMtu| &minus; 3. |attMtu| is the smaller of the
+    local Host's transmit ATT_MTU and the peer's receive ATT_MTU, and the 3
+    octets are the ATT Write Command header.
 1. For each |bluetoothGlobal| whose [=Bluetooth tree=] contains a
     {{BluetoothDevice}} representing the remote device,
     [=queue a global task=] on the [=Bluetooth task source=] given
@@ -5492,6 +5493,7 @@ BluetoothCommand = (
   bluetooth.SimulateAdvertisement //
   bluetooth.SimulateGattConnectionResponse //
   bluetooth.SimulateGattDisconnection //
+  bluetooth.SimulateGattMtuChange //
   bluetooth.SimulateService //
   bluetooth.SimulateCharacteristic //
   bluetooth.SimulateCharacteristicResponse //
@@ -5893,6 +5895,63 @@ A [=local end=] could simulate device GATT disconnection by sending the followin
   "params": {
     "context": "cxt-d03fdd81",
     "address": "09:09:09:09:09:09",
+  }
+}
+</pre>
+</div>
+
+#### The {^bluetooth.simulateGattMtuChange^} Command #### {#bluetooth-simulategattmtuchange-command}
+
+<pre highlight="cddl" class="cddl" data-cddl-module="remote-cddl,local-cddl">
+bluetooth.SimulateGattMtuChange = (
+   method: "bluetooth.simulateGattMtuChange",
+   params: bluetooth.SimulateGattMtuChangeParameters,
+)
+
+bluetooth.SimulateGattMtuChangeParameters = {
+   context: text,
+   address: text,
+   mtu: uint,
+}
+
+</pre>
+
+<div algorithm="remote end steps for bluetooth.simulateGattMtuChange">
+The [=remote end steps=] with command parameters |params| are:
+
+1. Let |contextId| be |params|[{^bluetooth.SimulateGattMtuChangeParameters/"context"^}].
+1. Let |navigable| be the result of [=trying=] to [=get a navigable=] with |contextId|.
+1. Let |deviceAddress| be |params|[{^bluetooth.SimulateGattMtuChangeParameters/"address"^}].
+1. Let |attMtu| be |params|[{^bluetooth.SimulateGattMtuChangeParameters/"mtu"^}].
+1. If |attMtu| is less than 23 or greater than 65535, return [=error=] with
+    [=error code=] [=invalid argument=].
+    <div class="note">
+      23 octets is the default ATT_MTU. A larger ATT_MTU can only be established
+      by the [=Exchange MTU=] procedure, whose ATT_MTU field is two octets wide.
+    </div>
+1. Let |simulatedBluetoothAdapter| be |navigable|'s <a>simulated Bluetooth adapter</a>.
+1. If |simulatedBluetoothAdapter| is empty, return [=error=] with [=error code=] [=invalid argument=].
+1. Let |deviceMapping| be |simulatedBluetoothAdapter|'s <a>simulated Bluetooth device mapping</a>.
+1. If |deviceMapping|[|deviceAddress|] [=map/exists=], let |simulatedDevice| be |deviceMapping|[|deviceAddress|].
+    Otherwise, return [=error=] with [=error code=] [=invalid argument=].
+1. Let |simulatedDeviceInstance| be the result of <a>get the <code>BluetoothDevice</code> representing</a>
+    |simulatedDevice| inside |navigable|'s <a>active window</a>'s <a spec=HTML>associated <code>Navigator</code></a>'s
+    [=associated Bluetooth=].
+1. <a>Respond to an ATT_MTU change</a> for |simulatedDeviceInstance| with |attMtu|.
+
+</div>
+
+<div class="example">
+A [=local end=] could simulate an ATT_MTU of 100 octets for a device by sending
+the following message:
+
+<pre highlight="json">
+{
+  "method": "bluetooth.simulateGattMtuChange",
+  "params": {
+    "context": "cxt-d03fdd81",
+    "address": "09:09:09:09:09:09",
+    "mtu": 100,
   }
 }
 </pre>
