@@ -5494,7 +5494,7 @@ A [=local end=] could simulate an adapter that supports Bluetooth Low Energy by 
   "params": {
     "context": "cxt-d03fdd81",
     "leSupported": true,
-    "state": "powered-on",
+    "state": "powered-on"
   }
 }
 </pre>
@@ -5508,7 +5508,7 @@ A [=local end=] could update the <a>adapter state</a> of an existing adapter by 
   "method": "bluetooth.simulateAdapter",
   "params": {
     "context": "cxt-d03fdd81",
-    "state": "powered-off",
+    "state": "powered-off"
   }
 }
 </pre>
@@ -5599,10 +5599,10 @@ A [=local end=] could simulate a preconnected peripheral by sending the followin
     "context": "cxt-d03fdd81",
     "address": "09:09:09:09:09:09",
     "name": "Some Device",
-    "manufacturerData": [ { key: 17, data: "AP8BAX8=" } ],
+    "manufacturerData": [ { "key": 17, "data": "AP8BAX8=" } ],
     "knownServiceUuids": [
-      "12345678-1234-5678-9abc-def123456789",
-    ],
+      "12345678-1234-5678-9abc-def123456789"
+    ]
   }
 }
 </pre>
@@ -5671,7 +5671,7 @@ A [=local end=] could simulate a device advertisement by sending the following m
       "scanRecord": {
         "name": "Heart Rate",
         "uuids": ["0000180d-0000-1000-8000-00805f9b34fb"],
-        "manufacturerData": [ { key: 17, data: "AP8BAX8=" } ],
+        "manufacturerData": [ { "key": 17, "data": "AP8BAX8=" } ],
         "appearance": 1,
         "txPower": 1
       }
@@ -5781,7 +5781,7 @@ A [=local end=] could simulate device GATT disconnection by sending the followin
   "method": "bluetooth.simulateGattDisconnection",
   "params": {
     "context": "cxt-d03fdd81",
-    "address": "09:09:09:09:09:09",
+    "address": "09:09:09:09:09:09"
   }
 }
 </pre>
